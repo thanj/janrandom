@@ -168,15 +168,16 @@ class JanRandom < Thor
     def parse_attr_defs( entity, depth = false )
       entity.each { |attr|
         if attr['name']
-          if attr['type']
-            if depth
-              return attr['type']
-            else
-              @schema[ attr['name'] ] = attr['type']
-            end
-          end
+          attr_method = UserAttrs.method_defined?(attr['name']) ? attr['name'] : attr['type']
           if attr['attr_defs']
             @schema[ attr['name'] ] = parse_attr_defs( attr['attr_defs'], "#{depth}#{attr['name']}." )
+          else UserAttrs.method_defined?(attr['name'])
+            attr_method = UserAttrs.method_defined?(attr['name']) ? attr['name'] : attr['type']
+            if depth
+              return attr_method
+            else
+              @schema[ attr['name'] ] = attr_method
+            end
           end
         end
       }
