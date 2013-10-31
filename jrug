@@ -66,7 +66,7 @@ class Jrug < Thor
       puts 'Using credentials from .appconfig file...'
       appoptions = @apps[app]
     else
-      puts "Enter credentials for #{app}..."
+      puts "Enter credentials for #{app}...\n"
       appoptions = Hash.new
       appoptions[:server]       = ask("Capture Server?  ") { |q| q.default = app }
       appoptions[:clientid]     = ask("Client ID?       ") { |q| q.default = "none" }
@@ -118,16 +118,41 @@ class Jrug < Thor
 
     puts "Creating #{number} randomized users for #{app}:"
 
-    table = Terminal::Table.new do |t|
-      number.to_i.times do
-        first_name = Faker::Name.first_name
-        last_name = Faker::Name.last_name
-        email = Faker::Internet.email([first_name,last_name].join(' '))
-        current_location = Faker::Address.city + ', ' + Faker::Address.state
-        t << [first_name, last_name, email, current_location]
+    randomUsers = [ ]
+    number.to_i.times do
+      user = UserAttrs.new()
+      record = { }
+      @apps[app][:schema].each do |attr,meth|
+        if UserAttrs.method_defined?(meth)
+          record[attr] = user.send(meth)
+        end
       end
+
+      randomUsers << record
+      user = nil
     end
 
+    appoptions = @apps[app]
+
+    createdUsers = RestClient.post( "https://#{appoptions[:server]}/entity.bulkCreate",
+      {
+        :client_id     => appoptions[:clientid],
+        :client_secret => appoptions[:clientsecret],
+        :type_name     => 'user',
+        :all_attributes      => JSON.dump(randomUsers)
+      }
+    )
+
+    apiResponse = JSON.parse( createdUsers )
+
+    tableRows = apiResponse['uuid_results'].zip(
+      randomUsers.collect { |n| n['displayName'] },
+      randomUsers.collect { |n| n['email'] },
+      randomUsers.collect { |n| n['currentLocation'] }
+    )
+
+
+    table = Terminal::Table.new :rows => tableRows
     puts table
   end
 
@@ -157,13 +182,62 @@ class Jrug < Thor
         end
       }
     end
+
   }
 
 
 end
 
 
-# TO DO - Add your Modules, Classes, etc
+class UserAttrs
+  def initialize
+    @aboutMe
+    @birthday
+    @givenName
+    @middleName
+    @displayName
+    @familyName
+    @email
+    @currentLocation
+    @gender
+  end
+
+  def aboutMe
+    @aboutMe ||= Faker::Lorem.paragraph
+  end
+
+  def birthday
+    return '1974-07-08'
+  end
+
+  def givenName
+    @givenName ||= Faker::Name.first_name
+  end
+
+  def middleName
+    @middleName ||= Faker::Name.first_name
+  end
+
+  def displayName
+    @displayName ||= [givenName(),familyName()].join(' ')
+  end
+
+  def familyName
+    @familyName ||= Faker::Name.last_name
+  end
+
+  def email
+    @email ||= Faker::Internet.email([givenName(),familyName()].join(' '))
+  end
+
+  def currentLocation
+    @currentLocation ||= Faker::Address.city + ', ' + Faker::Address.state
+  end
+
+  def gender
+    @gender ||=  ['male', 'female'].sample
+  end
+end
 
 
 # Create and run the application
