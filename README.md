@@ -3,6 +3,20 @@ JanRandom
 
 Populate your Janrain database with randomized fake users.
 
+
+## Installation
+
+Requires Ruby (>=1.9) and rubygems.
+
+Gem package coming soon. For now, clone the repository, run `bundle install`
+and optionally add this directory to your $PATH.
+
+    git clone https://github.com/thanj/janrandom.git
+    cd janrandom
+    bundle install
+    ./janrandom
+
+
 ## Usage
 
     janrandom init {myapp}
