@@ -122,7 +122,7 @@ class JanRandom < Thor
       user = UserAttrs.new()
       record = { }
       @apps[app][:schema].each do |attr,meth|
-        if UserAttrs.method_defined?(meth)
+        if meth.is_a?(String) && UserAttrs.method_defined?(meth)
           record[attr] = user.send(meth)
         end
       end
@@ -141,6 +141,8 @@ class JanRandom < Thor
         :all_attributes      => JSON.dump(randomUsers)
       }
     )
+
+    puts createdUsers
 
     apiResponse = JSON.parse( createdUsers )
 
@@ -237,7 +239,7 @@ class UserAttrs
   end
 
   def janRandomGenerated
-    true
+    "Y"
   end
 end
 
