@@ -135,14 +135,12 @@ class JanRandom < Thor
 
     createdUsers = RestClient.post( "https://#{appoptions[:server]}/entity.bulkCreate",
       {
-        :client_id     => appoptions[:clientid],
-        :client_secret => appoptions[:clientsecret],
-        :type_name     => 'user',
-        :all_attributes      => JSON.dump(randomUsers)
+        :client_id      => appoptions[:clientid],
+        :client_secret  => appoptions[:clientsecret],
+        :type_name      => 'user',
+        :all_attributes => JSON.dump(randomUsers)
       }
     )
-
-    puts createdUsers
 
     apiResponse = JSON.parse( createdUsers )
 
@@ -152,11 +150,43 @@ class JanRandom < Thor
       randomUsers.collect { |n| n['currentLocation'] }
     )
 
-
     table = Terminal::Table.new :rows => tableRows
     puts table
   end
 
+
+  desc "uncreate APP", "uncreate (bulk delete) dummy users created for the Capture app APP"
+  def uncreate(app)
+
+    read_options
+    unless @apps.has_key?(app)
+      puts "#{app} has not been initialized to JRUG yet. Try running `janrandom init #{app}` first."
+      exit
+    end
+
+    appoptions = @apps[app]
+
+    deletedUsers = RestClient.post( "https://#{appoptions[:server]}/entity.bulkDelete",
+      {
+        :client_id     => appoptions[:clientid],
+        :client_secret => appoptions[:clientsecret],
+        :type_name     => 'user',
+        :filter        => 'janRandomGenerated is not null',
+        :commit        => true
+      }
+    )
+
+    apiResponse = JSON.parse( deletedUsers )
+    if apiResponse.has_key?('delete_count')
+      puts ( apiResponse['delete_count'] > 0 ) ?
+        "Successfully deleted #{apiResponse['delete_count']} random people from #{app}." :
+        "No random users left to delete from this app!"
+    else
+      puts "Error deleting users."
+      puts apiResponse
+    end
+
+  end
 
   no_commands {
     def read_options
