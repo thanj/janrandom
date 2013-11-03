@@ -1,3 +1,4 @@
 Gemfile.lock
 .appconfig
 *.sw[n-p]
+*.gem
