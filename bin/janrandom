@@ -62,7 +62,7 @@ class JanRandom < Thor
     read_options
 
     if @apps && @apps.has_key?(app)
-      puts 'Using credentials from .appconfig file...'
+      puts 'Using credentials from janrandom.appconfig file...'
       appoptions = @apps[app]
     else
       puts "Enter credentials for #{app}...\n"
@@ -71,7 +71,7 @@ class JanRandom < Thor
       appoptions[:clientid]     = ask("Client ID?       ") { |q| q.default = "none" }
       appoptions[:clientsecret] = ask("Client Secret?   ") { |q| q.echo    = "x" }
       @apps[app] = appoptions
-      File.open('.appconfig', 'w') { |f| YAML.dump(@apps, f) }
+      File.open(@config_file, 'w') { |f| YAML.dump(@apps, f) }
     end
 
     entityType = RestClient.post( "https://#{appoptions[:server]}/entityType",
@@ -100,7 +100,7 @@ class JanRandom < Thor
     end
 
     @apps[app][:schema] = @schema
-    File.open('.appconfig', 'w') { |f| YAML.dump(@apps, f) }
+    File.open(@config_file, 'w') { |f| YAML.dump(@apps, f) }
 
     puts "Successfully prepared app #{app} for random user generation."
   end
@@ -190,8 +190,9 @@ class JanRandom < Thor
 
   no_commands {
     def read_options
-      if File.exist?(".appconfig")
-        @apps = YAML::load( File.open( ".appconfig" ) )
+      @config_file = File.expand_path("~/janrandom.appconfig")
+      if File.exist?(@config_file)
+        @apps = YAML::load( File.open(@config_file) )
       else
         @apps = { }
       end
