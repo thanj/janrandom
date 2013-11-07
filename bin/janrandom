@@ -188,6 +188,30 @@ class JanRandom < Thor
 
   end
 
+  desc "uninit APP", "remove the flag field added to app schema by this tool"
+  def uninit(app)
+
+    read_options
+    unless @apps.has_key?(app)
+      puts 'Invalid app name.'
+      exit
+    end
+
+    # If there is a "janRandomGenerated" attribute in the schema, remove it now
+    if @apps[app].has_key?('janRandomGenerated')
+      apiResponse = RestClient.post( "https://#{appoptions[:server]}/entityType.removeAttribute",
+        {
+          :client_id     => appoptions[:clientid],
+          :client_secret => appoptions[:clientsecret],
+          :type_name     => 'user',
+          :attr_name     => 'janRandomGenerated'
+        }
+      )
+      puts apiResponse
+    end
+  end
+
+
   no_commands {
     def read_options
       @config_file = File.expand_path("~/janrandom.appconfig")
@@ -215,8 +239,8 @@ class JanRandom < Thor
         end
       }
     end
-
   }
+
 end
 
 
