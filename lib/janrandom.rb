@@ -54,7 +54,7 @@ class JanRandom < Thor
   def apps()
     read_options
 
-    puts 'Apps available to JRUG:'
+    puts 'Apps available to janrandom:'
     @apps.each_key { |key| puts key }
   end
 
@@ -213,12 +213,24 @@ class JanRandom < Thor
     end
   end
 
-  desc "test", "Lorem ipsum interest"
-  def test()
-    Faker::Lorem.flexible :interests
-    10.times do
-      puts Faker::Base.fetch('lorem.interests')
+  desc "test APP", "Dry-run, display a random user such as that would be generated for APP's schema"
+  def test(app)
+    read_options
+    unless @apps.has_key?(app)
+      puts 'Invalid app name.'
+      exit
     end
+
+    user = UserAttrs.new()
+    record = { }
+    @apps[app][:schema].each do |attr,meth|
+      if meth.is_a?(String) && UserAttrs.method_defined?(meth)
+        record[attr] = user.send(meth)
+      end
+    end
+
+    table = Terminal::Table.new :rows => record
+    puts table
   end
 
   no_commands {
@@ -264,6 +276,9 @@ class UserAttrs
     @email
     @currentLocation
     @gender
+    @interests
+    @music
+    @movies
   end
 
   def aboutMe
@@ -300,6 +315,18 @@ class UserAttrs
 
   def gender
     @gender ||=  ['male', 'female'].sample
+  end
+
+  def interests
+    @interests ||= Random.rand(10).times.map{ Faker::Base.fetch('lorem.interests') }
+  end
+
+  def music
+    @music ||= Random.rand(10).times.map{ Faker::Base.fetch('lorem.music') }
+  end
+
+  def movies
+    @movies ||= Random.rand(10).times.map{ Faker::Base.fetch('lorem.movies') }
   end
 
   def janRandomGenerated
