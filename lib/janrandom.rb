@@ -260,9 +260,20 @@ class JanRandom < Thor
         end
       }
     end
+
   }
 
 end
+
+    def random_in_range( from, to )
+      from, to = to, from if to < from
+      rand * (to - from ) + from
+    end
+
+    def bell_random_in_range( from, to )
+      from, to = to, from if to < from
+      ( rand * (to - from ) + rand * (to - from ) ) / 2 + from
+    end
 
 class UserAttrs
   def initialize
@@ -285,7 +296,9 @@ class UserAttrs
   end
 
   def birthday
-    return '1974-07-08'
+    now = Time.now().to_i()
+    d = bell_random_in_range( now - 13 * 365 * 24 * 3600, now - 60 * 365 * 24 * 3600 )
+    Time.at(d).strftime('%Y-%m-%d')
   end
 
   def givenName
