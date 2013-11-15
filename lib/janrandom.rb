@@ -265,15 +265,34 @@ class JanRandom < Thor
 
 end
 
-    def random_in_range( from, to )
-      from, to = to, from if to < from
-      rand * (to - from ) + from
-    end
+module Faker
+  class Base
+    class << self
 
-    def bell_random_in_range( from, to )
-      from, to = to, from if to < from
-      ( rand * (to - from ) + rand * (to - from ) ) / 2 + from
+      def fetch_with_weighting(key)
+        fetched = translate("faker.#{key}")
+        num = rand(fetched.length) + rand(fetched.length) - fetched.length
+        fetched = fetched[num.abs] if fetched.respond_to?(:sample)
+        if fetched.match(/^\//) and fetched.match(/\/$/) # A regex
+          regexify(fetched)
+        else
+          fetched
+        end
+      end
+
+      def random_in_range( from, to )
+        from, to = to, from if to < from
+        rand * (to - from ) + from
+      end
+
+      def bell_random_in_range( from, to )
+        from, to = to, from if to < from
+        ( rand * (to - from ) + rand * (to - from ) ) / 2 + from
+      end
+
     end
+  end
+end
 
 class UserAttrs
   def initialize
@@ -297,18 +316,22 @@ class UserAttrs
 
   def birthday
     now = Time.now().to_i()
-    d = bell_random_in_range( now - 13 * 365 * 24 * 3600, now - 60 * 365 * 24 * 3600 )
+    d = Faker::Base.bell_random_in_range( now - 13 * 365 * 24 * 3600, now - 60 * 365 * 24 * 3600 )
     Time.at(d).strftime('%Y-%m-%d')
   end
 
   def givenName
     gender = gender()
-    @givenName ||= (gender == 'female') ? Faker::Base.fetch('name.female_name_common') : Faker::Base.fetch('name.male_name_common')
+    @givenName ||= (gender == 'female') ?
+        Faker::Base.fetch_with_weighting('name.female_name_common')
+      : Faker::Base.fetch_with_weighting('name.male_name_common')
   end
 
   def middleName
     gender = gender()
-    @middleName ||= (gender == 'female') ? Faker::Base.fetch('name.female_name_common') : Faker::Base.fetch('name.male_name_common')
+    @middleName ||= (gender == 'female') ?
+        Faker::Base.fetch_with_weighting('name.female_name_common')
+      : Faker::Base.fetch_with_weighting('name.male_name_common')
   end
 
   def displayName
