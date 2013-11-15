@@ -355,15 +355,15 @@ class UserAttrs
   end
 
   def interests
-    @interests ||= Random.rand(10).times.map{ Faker::Base.fetch('lorem.interests') }
+    @interests ||= Random.rand(12).times.map{ Faker::Base.fetch_with_weighting('lorem.interests') }.uniq
   end
 
   def music
-    @music ||= Random.rand(10).times.map{ Faker::Base.fetch('lorem.music') }
+    @music ||= Random.rand(12).times.map{ Faker::Base.fetch_with_weighting('lorem.music') }.uniq
   end
 
   def movies
-    @movies ||= Random.rand(10).times.map{ Faker::Base.fetch('lorem.movies') }
+    @movies ||= Random.rand(12).times.map{ Faker::Base.fetch_with_weighting('lorem.movies') }.uniq
   end
 
   def janRandomGenerated
