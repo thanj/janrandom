@@ -264,7 +264,6 @@ class JanRandom < Thor
 
 end
 
-
 class UserAttrs
   def initialize
     @aboutMe
@@ -290,11 +289,13 @@ class UserAttrs
   end
 
   def givenName
-    @givenName ||= Faker::Name.first_name
+    gender = gender()
+    @givenName ||= (gender == 'female') ? Faker::Base.fetch('name.female_name_common') : Faker::Base.fetch('name.male_name_common')
   end
 
   def middleName
-    @middleName ||= Faker::Name.first_name
+    gender = gender()
+    @middleName ||= (gender == 'female') ? Faker::Base.fetch('name.female_name_common') : Faker::Base.fetch('name.male_name_common')
   end
 
   def displayName
