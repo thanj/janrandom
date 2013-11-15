@@ -3,6 +3,7 @@ JanRandom
 
 Populate your Janrain database with randomized fake users.
 
+[![Gem Version](https://badge.fury.io/rb/janrandom.png)](http://badge.fury.io/rb/janrandom)
 
 ## Installation
 
@@ -10,20 +11,20 @@ Requires Ruby (>=1.9) and rubygems.
 
 #### If you want to be able to hack on this gem yourself:
 
-**Recommended, for now:** Clone the repository, run `bundle install`, and
-optionally add a symlink to this directory into your `$PATH`.
+Clone the repository, run `bundle install`, and run the command using `ruby
+lib/janrandom.rb`.
 
     git clone https://github.com/thanj/janrandom.git
     cd janrandom
     bundle install
-    sudo ln -s bin/janrandom /usr/bin
-    janrandom
+    ruby lib/janrandom.rb
 
 #### If you just want to run it:
 
-**Experimental:** Installing via Rubygems is possible.
+Installing via Rubygems is possible. (This adds an executable to your path, so
+you will probably need to install using `sudo`.)
 
-    gem install janrandom
+    sudo gem install janrandom
     janrandom
 
 
@@ -47,6 +48,16 @@ This script works by adding an attribute to the app schema called
 this script. Calling "uncreate" simply makes an `entity.bulkDelete` API call on
 all records with th "janRandomGenerated" flag set.
 
+#### See an example of the records janrandom would create for your app
+
+    janrandom test {myapp}
+
+This will display an example of a record that would be generated with the
+`janrandom create` command. Use this (maybe a few times) and look over the
+results before running a bulk create. If you want to tweak the type of result
+that is generated, you can modify the schema of the app in your
+`~/janrandom.appconfig` file.
+
 #### Create randomized user records
 
     janrandom create {myapp} [number]
@@ -63,7 +74,7 @@ Uncreates all random users created with this script
 
     janrandom uninit {myapp}
 
-Remove the "janRandomGenerated" flag from the app schema:
+Removes the "janRandomGenerated" flag from the app schema:
 
 Note that this doesn't delete the app's client ID and secret from the
 `janrandom.appconfig` file. You'll have to do that yourself if you want to do
