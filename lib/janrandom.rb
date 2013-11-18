@@ -308,6 +308,7 @@ class UserAttrs
     @interests
     @music
     @movies
+    @books
   end
 
   def aboutMe
@@ -364,6 +365,10 @@ class UserAttrs
 
   def movies
     @movies ||= Random.rand(12).times.map{ Faker::Base.fetch_with_weighting('lorem.movies') }.uniq
+  end
+
+  def books
+    @books ||= Random.rand(12).times.map{ Faker::Base.fetch_with_weighting('lorem.books') }.uniq
   end
 
   def janRandomGenerated
